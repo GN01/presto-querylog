@@ -1,5 +1,7 @@
 package com.github.presto.querylog;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.airlift.units.DataSize;
 import io.prestosql.spi.eventlistener.QueryContext;
 import io.prestosql.spi.eventlistener.QueryCreatedEvent;
@@ -9,6 +11,7 @@ import io.prestosql.spi.eventlistener.SplitStatistics;
 import io.prestosql.spi.session.ResourceEstimates;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -27,10 +30,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 // Those are just a few very crude tests.
 // TODO: Add more cases with proper structure.
 // TODO: Test actual JSON output, not just its presence.
-public class QueryLogListenerTest {
+class QueryLogListenerTest {
+
+    static ObjectMapper mapper;
+
+    @BeforeAll
+    static void setup() {
+        mapper = new ObjectMapper();
+        mapper.registerModule(new Jdk8Module());
+    }
 
     @Test
-    public void queryCreatedEvents() throws IOException {
+    void queryCreatedEvents() throws IOException {
         LoggerContext loggerContext = Configurator.initialize(
                 "queryCreatedEvents",
                 "classpath:queryCreatedEvents.xml"
@@ -38,7 +49,7 @@ public class QueryLogListenerTest {
         try {
             // Given there is a listener for query created event
             QueryLogListener listener = new QueryLogListener(
-                    loggerContext,
+                    loggerContext, mapper,
                     true, true, true
             );
 
@@ -56,7 +67,7 @@ public class QueryLogListenerTest {
 
 
     @Test
-    public void onlyQueryCreatedEvents() throws IOException {
+    void onlyQueryCreatedEvents() throws IOException {
         LoggerContext loggerContext = Configurator.initialize(
                 "onlyQueryCreatedEvents",
                 "classpath:onlyQueryCreatedEvents.xml"
@@ -64,7 +75,7 @@ public class QueryLogListenerTest {
         try {
             // Given there is a listener for query created event
             QueryLogListener listener = new QueryLogListener(
-                    loggerContext,
+                    loggerContext, mapper,
                     true, false, false
             );
 

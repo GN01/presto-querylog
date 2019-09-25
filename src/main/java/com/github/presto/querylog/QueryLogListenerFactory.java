@@ -13,6 +13,8 @@
  */
 package com.github.presto.querylog;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.prestosql.spi.eventlistener.EventListener;
 import io.prestosql.spi.eventlistener.EventListenerFactory;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -42,7 +44,9 @@ public class QueryLogListenerFactory implements EventListenerFactory {
         boolean trackEventCreated = getBooleanConfig(map, QUERYLOG_TRACK_CREATED, true);
         boolean trackEventCompleted = getBooleanConfig(map, QUERYLOG_TRACK_COMPLETED, true);
         boolean trackEventCompletedSplit = getBooleanConfig(map, QUERYLOG_TRACK_COMPLETED_SPLIT, true);
-        return new QueryLogListener(loggerContext, trackEventCreated, trackEventCompleted, trackEventCompletedSplit);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new Jdk8Module());
+        return new QueryLogListener(loggerContext, mapper, trackEventCreated, trackEventCompleted, trackEventCompletedSplit);
     }
 
     /**

@@ -13,25 +13,29 @@
  */
 package com.github.presto.querylog;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.prestosql.spi.eventlistener.EventListener;
 import io.prestosql.spi.eventlistener.QueryCompletedEvent;
 import io.prestosql.spi.eventlistener.QueryCreatedEvent;
 import io.prestosql.spi.eventlistener.SplitCompletedEvent;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.message.ObjectMessage;
 
 public class QueryLogListener implements EventListener {
     private final Logger logger;
+    private final ObjectMapper mapper;
     private final boolean trackEventCreated;
     private final boolean trackEventCompleted;
     private final boolean trackEventCompletedSplit;
 
     public QueryLogListener(final LoggerContext loggerContext,
+                            final ObjectMapper mapper,
                             final boolean trackEventCreated,
                             final boolean trackEventCompleted,
                             final boolean trackEventCompletedSplit) {
         this.trackEventCreated = trackEventCreated;
+        this.mapper = mapper;
         this.trackEventCompleted = trackEventCompleted;
         this.trackEventCompletedSplit = trackEventCompletedSplit;
         this.logger = loggerContext.getLogger(QueryLogListener.class.getName());
@@ -40,21 +44,30 @@ public class QueryLogListener implements EventListener {
     @Override
     public void queryCreated(final QueryCreatedEvent queryCreatedEvent) {
         if (trackEventCreated) {
-            logger.info(new ObjectMessage(queryCreatedEvent));
+            try {
+                logger.info(mapper.writeValueAsString(queryCreatedEvent));
+            } catch (JsonProcessingException ignored) {
+            }
         }
     }
 
     @Override
     public void queryCompleted(final QueryCompletedEvent queryCompletedEvent) {
         if (trackEventCompleted) {
-            logger.info(new ObjectMessage(queryCompletedEvent));
+            try {
+                logger.info(mapper.writeValueAsString(queryCompletedEvent));
+            } catch (JsonProcessingException ignored) {
+            }
         }
     }
 
     @Override
     public void splitCompleted(final SplitCompletedEvent splitCompletedEvent) {
         if (trackEventCompletedSplit) {
-            logger.info(new ObjectMessage(splitCompletedEvent));
+            try {
+                logger.info(mapper.writeValueAsString(splitCompletedEvent));
+            } catch (JsonProcessingException ignored) {
+            }
         }
     }
 }
