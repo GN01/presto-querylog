@@ -53,7 +53,7 @@ public class QueryLogListener implements EventListener {
 
     @Override
     public void queryCompleted(final QueryCompletedEvent queryCompletedEvent) {
-        if (trackEventCompleted) {
+        if (trackEventCompleted && !queryCompletedEvent.getIoMetadata().getInputs().get(0).getCatalogName().equals("$system@system")) {
             try {
                 logger.info(mapper.writeValueAsString(queryCompletedEvent));
             } catch (JsonProcessingException ignored) {
