@@ -41,6 +41,17 @@ class QueryLogListenerTest {
     }
 
     @Test
+    void tmp() {
+        String s = "123456789012345678901234567890";
+        StringBuilder sb = new StringBuilder();
+        sb.append(s, 0, 10);
+        sb.append("....");
+        sb.append(s, s.length()-10, s.length());
+        System.out.println(sb.toString());
+        System.out.println(sb.length());
+    }
+
+    @Test
     void queryCreatedEvents() throws IOException {
         LoggerContext loggerContext = Configurator.initialize(
                 "queryCreatedEvents",
@@ -50,7 +61,7 @@ class QueryLogListenerTest {
             // Given there is a listener for query created event
             QueryLogListener listener = new QueryLogListener(
                     loggerContext, mapper,
-                    true, true, true
+                    true, true, true, true
             );
 
             // When two events are created
@@ -76,7 +87,7 @@ class QueryLogListenerTest {
             // Given there is a listener for query created event
             QueryLogListener listener = new QueryLogListener(
                     loggerContext, mapper,
-                    true, false, false
+                    true, false, false, true
             );
 
             // When one created event is created

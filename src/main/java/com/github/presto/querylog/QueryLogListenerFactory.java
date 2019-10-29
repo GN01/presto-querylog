@@ -30,6 +30,8 @@ public class QueryLogListenerFactory implements EventListenerFactory {
     private static final String QUERYLOG_TRACK_COMPLETED = "presto.querylog.log.queryCompletedEvent";
     private static final String QUERYLOG_TRACK_COMPLETED_SPLIT = "presto.querylog.log.splitCompletedEvent";
 
+    private static final String QUERYLOG_TRACK_COMPLETED_FULL_QUERY = "presto.querylog.log.queryCompletedEvent.fullQuery";
+
     private static final String QUERYLOG_CONFIG_LOCATION_ERROR = QUERYLOG_CONFIG_LOCATION + " is null";
 
     @Override
@@ -44,9 +46,10 @@ public class QueryLogListenerFactory implements EventListenerFactory {
         boolean trackEventCreated = getBooleanConfig(map, QUERYLOG_TRACK_CREATED, true);
         boolean trackEventCompleted = getBooleanConfig(map, QUERYLOG_TRACK_COMPLETED, true);
         boolean trackEventCompletedSplit = getBooleanConfig(map, QUERYLOG_TRACK_COMPLETED_SPLIT, true);
+        boolean trackEventCompletedFullQuery = getBooleanConfig(map, QUERYLOG_TRACK_COMPLETED_FULL_QUERY, true);
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new Jdk8Module());
-        return new QueryLogListener(loggerContext, mapper, trackEventCreated, trackEventCompleted, trackEventCompletedSplit);
+        return new QueryLogListener(loggerContext, mapper, trackEventCreated, trackEventCompleted, trackEventCompletedSplit, trackEventCompletedFullQuery);
     }
 
     /**
