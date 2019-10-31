@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" name="PrestoQueryLog" packages="">
+    <Properties>
+        <Property name="log.root.dir">/var/log/presto/querylog</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="JsonRollingFile">
+            <FileName>${log.root.dir}/presto-querylog.log</FileName>
+            <FilePattern>${log.root.dir}/%d{yyyy-MM-dd-hh}-%i.log</FilePattern>
+            <PatternLayout pattern="%msg%n"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="JsonRollingFile"/>
+        </Root>
+    </Loggers>
+</Configuration>

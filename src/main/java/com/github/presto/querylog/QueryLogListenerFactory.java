@@ -30,7 +30,7 @@ public class QueryLogListenerFactory implements EventListenerFactory {
     private static final String QUERYLOG_TRACK_COMPLETED = "presto.querylog.log.queryCompletedEvent";
     private static final String QUERYLOG_TRACK_COMPLETED_SPLIT = "presto.querylog.log.splitCompletedEvent";
 
-    private static final String QUERYLOG_TRACK_COMPLETED_FULL_QUERY = "presto.querylog.log.queryCompletedEvent.fullQuery";
+    private static final String QUERYLOG_TRACK_COMPLETED_QUERY_LENGTH = "presto.querylog.log.queryCompletedEvent.queryLength";
 
     private static final String QUERYLOG_CONFIG_LOCATION_ERROR = QUERYLOG_CONFIG_LOCATION + " is null";
 
@@ -46,10 +46,10 @@ public class QueryLogListenerFactory implements EventListenerFactory {
         boolean trackEventCreated = getBooleanConfig(map, QUERYLOG_TRACK_CREATED, true);
         boolean trackEventCompleted = getBooleanConfig(map, QUERYLOG_TRACK_COMPLETED, true);
         boolean trackEventCompletedSplit = getBooleanConfig(map, QUERYLOG_TRACK_COMPLETED_SPLIT, true);
-        boolean trackEventCompletedFullQuery = getBooleanConfig(map, QUERYLOG_TRACK_COMPLETED_FULL_QUERY, true);
+        int trackEventCompletedQueryLength = getIntegerConfig(map, QUERYLOG_TRACK_COMPLETED_QUERY_LENGTH, -1);
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new Jdk8Module());
-        return new QueryLogListener(loggerContext, mapper, trackEventCreated, trackEventCompleted, trackEventCompletedSplit, trackEventCompletedFullQuery);
+        return new QueryLogListener(loggerContext, mapper, trackEventCreated, trackEventCompleted, trackEventCompletedSplit, trackEventCompletedQueryLength);
     }
 
     /**
@@ -64,6 +64,22 @@ public class QueryLogListenerFactory implements EventListenerFactory {
         String value = params.get(paramName);
         if (value != null && !value.trim().isEmpty()) {
             return Boolean.parseBoolean(value);
+        }
+        return paramDefault;
+    }
+
+    /**
+     * Get {@code int} parameter value, or return default.
+     *
+     * @param params       Map of parameters
+     * @param paramName    Parameter name
+     * @param paramDefault Parameter default value
+     * @return Parameter value or default.
+     */
+    private int getIntegerConfig(Map<String, String> params, String paramName, int paramDefault) {
+        String value = params.get(paramName);
+        if (value != null && !value.trim().isEmpty()) {
+            return Integer.parseInt(value);
         }
         return paramDefault;
     }

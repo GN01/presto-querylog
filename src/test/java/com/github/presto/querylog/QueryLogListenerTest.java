@@ -20,6 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
@@ -41,7 +44,7 @@ class QueryLogListenerTest {
     }
 
     @Test
-    void tmp() {
+    void shrinkPrestoQuery() {
         String s = "123456789012345678901234567890";
         StringBuilder sb = new StringBuilder();
         sb.append(s, 0, 10);
@@ -49,6 +52,14 @@ class QueryLogListenerTest {
         sb.append(s, s.length()-10, s.length());
         System.out.println(sb.toString());
         System.out.println(sb.length());
+    }
+
+    @Test
+    void dateFormat() {
+        Instant i = Instant.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        String r = formatter.format(LocalDateTime.ofInstant(i, ZoneId.of("UTC")));
+        System.out.println(r);
     }
 
     @Test
@@ -61,7 +72,7 @@ class QueryLogListenerTest {
             // Given there is a listener for query created event
             QueryLogListener listener = new QueryLogListener(
                     loggerContext, mapper,
-                    true, true, true, true
+                    true, true, true, -1
             );
 
             // When two events are created
@@ -87,7 +98,7 @@ class QueryLogListenerTest {
             // Given there is a listener for query created event
             QueryLogListener listener = new QueryLogListener(
                     loggerContext, mapper,
-                    true, false, false, true
+                    true, false, false, -1
             );
 
             // When one created event is created

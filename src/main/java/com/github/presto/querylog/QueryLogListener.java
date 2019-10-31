@@ -28,20 +28,20 @@ public class QueryLogListener implements EventListener {
     private final boolean trackEventCreated;
     private final boolean trackEventCompleted;
     private final boolean trackEventCompletedSplit;
-    private final boolean trackEventCompletedFullQuery;
+    private final int trackEventCompletedQueryLength;
 
     public QueryLogListener(final LoggerContext loggerContext,
                             final ObjectMapper mapper,
                             final boolean trackEventCreated,
                             final boolean trackEventCompleted,
                             final boolean trackEventCompletedSplit,
-                            final boolean trackEventCompletedFullQuery) {
+                            final int trackEventCompletedQueryLength) {
         this.trackEventCreated = trackEventCreated;
         this.mapper = mapper;
         this.trackEventCompleted = trackEventCompleted;
         this.trackEventCompletedSplit = trackEventCompletedSplit;
         this.logger = loggerContext.getLogger(QueryLogListener.class.getName());
-        this.trackEventCompletedFullQuery = trackEventCompletedFullQuery;
+        this.trackEventCompletedQueryLength = trackEventCompletedQueryLength;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class QueryLogListener implements EventListener {
     public void queryCompleted(final QueryCompletedEvent queryCompletedEvent) {
         if (trackEventCompleted && !queryCompletedEvent.getIoMetadata().getInputs().get(0).getCatalogName().equals("$system@system")) {
             try {
-                logger.info(mapper.writeValueAsString(new CustomLogContext().parse(queryCompletedEvent, trackEventCompletedFullQuery)));
+                logger.info(mapper.writeValueAsString(new CustomLogContext().parse(queryCompletedEvent, trackEventCompletedQueryLength)));
             } catch (JsonProcessingException ignored) {
             }
         }

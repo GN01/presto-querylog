@@ -2,6 +2,9 @@ package com.github.presto.querylog;
 
 import io.prestosql.spi.eventlistener.QueryCompletedEvent;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +16,8 @@ import java.util.List;
 public class CustomLogContext {
 
     private static final long MB_BYTES = 1_048_576;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private Metadata metadata;
 
@@ -22,18 +27,19 @@ public class CustomLogContext {
 
     private List<InputMetaData> inputMetaDataList;
 
-    private long createTime;
-    private long startTime;
-    private long endTime;
+    private String createTime;
+    private String startTime;
+    private String endTime;
 
-    public CustomLogContext parse(QueryCompletedEvent event, boolean trackEventCompletedFullQuery) {
+    public CustomLogContext parse(QueryCompletedEvent event, int trackEventCompletedQueryLength) {
         Metadata metadata = new Metadata();
+        metadata.setQueryId(event.getMetadata().getQueryId());
         String query = event.getMetadata().getQuery().trim();
-        if (!trackEventCompletedFullQuery && query.length() > 60) {
-            StringBuilder sb = new StringBuilder(64);
-            sb.append(query, 0, 30);
+        if (trackEventCompletedQueryLength != -1 && query.length() > trackEventCompletedQueryLength) {
+            StringBuilder sb = new StringBuilder(trackEventCompletedQueryLength);
+            sb.append(query, 0, (trackEventCompletedQueryLength-4)/2);
             sb.append("....");
-            sb.append(query, query.length()-30, query.length());
+            sb.append(query, query.length()-(trackEventCompletedQueryLength-4)/2, query.length());
             metadata.setQuery(sb.toString());
         } else {
             metadata.setQuery(query);
@@ -75,9 +81,9 @@ public class CustomLogContext {
         });
         this.setInputMetaDataList(inputMetaDataList);
 
-        this.setCreateTime(event.getCreateTime().getEpochSecond());
-        this.setStartTime(event.getExecutionStartTime().getEpochSecond());
-        this.setEndTime(event.getEndTime().getEpochSecond());
+        this.setCreateTime(LocalDateTime.ofInstant(event.getCreateTime(), ZoneId.of("UTC")).format(DATE_TIME_FORMATTER));
+        this.setStartTime(LocalDateTime.ofInstant(event.getExecutionStartTime(), ZoneId.of("UTC")).format(DATE_TIME_FORMATTER));
+        this.setEndTime(LocalDateTime.ofInstant(event.getEndTime(), ZoneId.of("UTC")).format(DATE_TIME_FORMATTER));
 
         return this;
     }
@@ -114,32 +120,41 @@ public class CustomLogContext {
         this.inputMetaDataList = inputMetaDataList;
     }
 
-    public long getCreateTime() {
+    public String getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(long createTime) {
+    public void setCreateTime(String createTime) {
         this.createTime = createTime;
     }
 
-    public long getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(long startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public long getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(long endTime) {
+    public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
 
     static class Metadata {
+        private String queryId;
         private String query;
+
+        public String getQueryId() {
+            return queryId;
+        }
+
+        public void setQueryId(String queryId) {
+            this.queryId = queryId;
+        }
 
         public String getQuery() {
             return query;
